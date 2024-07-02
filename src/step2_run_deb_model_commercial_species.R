@@ -7,18 +7,18 @@ rm(list=ls()) #clean R environment
 options(scipen = 999) #adopt scientific notation
 
 #Load Parameters R Data
-load("./input_data/DEB_Parameters_Commercial.RData")
+load("C:/Users/gabri/Dropbox/Pacchetto DEB R/DEB Tutorial/Step1_Upload_Input_Data/DEB_Parameters_Commercial.RData")
 ##############################################################################################################################################################
 
 ### Step II - Run DEB Model
 #from here on the code compute the model for each pixel through a for cycle, no need to change anything
 
 #Create Empty 3 dimensional array in which upload DEB outputs (x= time series steps of the model (year), y= number of model ouputs, z= spatial point)
-results<-array(NA, c(year.v, 14, ncol(temperaturecsv)))
+results<-array(NA, c(year.v, 13, ncol(temperaturecsv)))
 colnames(results)<-c("pixel","year","Length.cm","WetWeight.g",
                      "N.eggs","N.ReprEvents","TRO","Faeces.g/h",
                      "N.eggs.CUM","N.ReprEvents.CUM","TRO.CUM","Faeces.g/h.CUM",
-                     "TimeToCommercial.days","Mortality")
+                     "TimeToCommercial.days")
 
 system.time(
   for (pix in 1:ncol(temperaturecsv)) {
@@ -100,7 +100,6 @@ system.time(
     k_pC <- rep(NA,total.rows)
     S_M <- rep(NA,total.rows)
     ukpC <- rep(NA,total.rows)
-    dead <- rep(NA,total.rows)
     Faeces.g.h <- rep(NA,total.rows)
     
     
@@ -188,11 +187,7 @@ system.time(
       #Faeces.g.h[t] <- (Jx_cells[t] * (1-ae))/1000 #Unmute this one to compute for the whole life cycle
       Faeces.g.h[t] <- ifelse(L[t]<=ComSize,(Jx_cells[t] * (1-ae))/1000,0) # to compute up to commercial size
       
-      # 15. Mortality
-      k_pC[t] <- kap*pC[t]
-      S_M[t] <- pM[t]+ER2[t]+ENrep[t] # Somatic maintenance
-      ukpC[t] <- (1-kap)*pC[t]
-      dead[t] <- ifelse(k_pC[t]<S_M[t] & ukpC[t]<pJ[t],1,0)
+    
     }
     
     
@@ -216,7 +211,6 @@ system.time(
     N.ReprEvents.CUM=rep(NA,year.v)
     TRO.CUM=rep(NA,year.v)
     Faeces.CUM=rep(NA,year.v)
-    Mortality=rep(NA,year.v)
     TimeToCommercial.days=rep(NA,year.v)
     
     #estimate 
@@ -232,10 +226,7 @@ system.time(
       N.ReprEvents.CUM[y]=sum(ifelse(rep_events[1:single.year[y]]==3.5,1,0))
       TRO.CUM[y]=N.eggs.CUM[y]/N.ReprEvents.CUM[y]
       Faeces.CUM[y]=sum(Faeces.g.h[1:single.year[y]])
-      TimeToCommercial.days[y]= sum(ifelse(L<ComSize,1,0))/24
-      Mortality[y]=ifelse(sum(dead[1:1705])>=62,"Dead","Alive")
-      Mortality[y]=ifelse(Mortality[1]=="Dead","Dead","Alive")
-    }
+      TimeToCommercial.days[y]= sum(ifelse(L<ComSize,1,0))/24}
     
     #FOR INDIVIDUAL YEAR, NOT CUMULATIVE 
     
@@ -260,8 +251,7 @@ system.time(
       round(N.ReprEvents.CUM,0),
       round(TRO.CUM,0),
       round(Faeces.CUM,2),
-      round(TimeToCommercial.days,0),
-      Mortality)
+      round(TimeToCommercial.days,0))
     
     print(data.frame(Completion=c(pix,pix/ncol(temperaturecsv)*100),
                      row.names=c("Pixel","Percentage")))
@@ -273,11 +263,11 @@ head(results[,,1])#change the number inside the square brackets to see the outpu
 
 #Save model output of year of interest
 #Create a two dimensional matrix (rows= spatial point, columns= model outputs )
-finalcsv<-(matrix(NA,nrow=ncol(temperaturecsv),ncol = 14))  
+finalcsv<-(matrix(NA,nrow=ncol(temperaturecsv),ncol = 13))  
 colnames(finalcsv)<-c("pixel","year","Length.cm","WetWeight.g",
                       "N.eggs","N.ReprEvents","TRO","Faeces.g/h",
                       "N.eggs.CUM","N.ReprEvents.CUM","TRO.CUM","Faeces.g/h.CUM",
-                      "TimeToCommercial.days","Mortality")
+                      "TimeToCommercial.days")
 
 #Assign model outputs of the year of interest to the matrix
 for (riga in 1:ncol(temperaturecsv)){
@@ -292,5 +282,7 @@ for (num in 2:(ncol(finalcsv)-1)){
 View(finalcsv) 
 
 #Save output matrix in a csv file
+setwd("C:/Users/gabri/Dropbox/Pacchetto DEB R/DEB Tutorial/Step2_Run_DEB_Model/Model_Output")
 
-data.table::fwrite(finalcsv,"../example/DEB_Output_Commercial_test.csv",sep = ";",dec = ".") #write the csv file inside the specified working directory
+data.table::fwrite(finalcsv,"DEB_Output_Commercial_test.csv",sep = ";",dec = ".") #write the csv file inside the specified working directory
+
