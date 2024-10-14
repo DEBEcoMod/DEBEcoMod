@@ -22,9 +22,6 @@ colnames(results)<-c("pixel","year","Length.cm","WetWeight.g",
                      "N.eggs.CUM","Faeces.g/h.CUM",
                      "TimeToCommercial.days")
 
-#Load temperature and food data
-temperaturecsv<-data.frame(p1=rep(20,am*24),p2=rep(20,am*24))
-foodcsv<-data.frame(p1=rep(10000,am*24),p2=rep(10000,am*24))
 
 timestep<-1/24 #Specify the desired timestep (1/24 for hourly, 1 for daily)
 

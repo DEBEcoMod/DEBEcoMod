@@ -112,7 +112,7 @@ V0<-L0^3
 
 ## Feeding ##
 # Half saturation coefficient (ug L^-1)
-K <- 2.9864e-06 #2.973952
+K <- 2.9864e-06
 
 # Food energy conversion factor (J mg^-1)
 mu_X <- 525000
